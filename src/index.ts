@@ -1,6 +1,6 @@
 import IORedis, {Ok, Redis} from 'ioredis';
 import {isFunction, isUndefined} from '@kubric/utils';
-import {InitOptions} from './types';
+import {InitOptions, PromiseWithListener} from './types';
 
 export default class Cache {
   static redisInstance: Redis;
@@ -8,6 +8,8 @@ export default class Cache {
   static timeoutPerRequest?: number;
 
   name: string;
+
+  private entities: any;
 
   static execute(commandPromise) {
     const {timeoutPerRequest} = Cache;
@@ -150,11 +152,11 @@ export default class Cache {
       match: keyPattern,
     });
     let deleted = 0;
-    const promise = new Promise((resolve, reject) => {
+    const promise: PromiseWithListener = new Promise((resolve, reject) => {
       stream.on('data', (keys) => {
         if (keys.length) {
           const pipeline = Cache.redisInstance.pipeline();
-          keys.forEach(function (key, index) {
+          keys.forEach((key, index) => {
             // HSCAN returns an array [field1, value1, field2, value2...].So only even members are taken as keys for
             // deletion
             if (index % 2 === 0) {
@@ -170,7 +172,7 @@ export default class Cache {
         reject(ex);
       });
       stream.on('end', () => {
-        console.log(`Deleted ${deleted} keys`);
+        console.info(`Deleted ${deleted} keys`);
         resolve(deleted);
       });
     });
@@ -187,8 +189,8 @@ export default class Cache {
         .get(Cache.getKey(Cache.name, entity, key))
         .then((result) => {
           try {
-            return JSON.parse(result);
-          } catch (e) {
+            return JSON.parse(result ?? '');
+          } catch (_err) {
             return result;
           }
         })
@@ -205,11 +207,11 @@ export default class Cache {
       match: Cache.getKey(Cache.name, entity, keyPattern),
     });
     let deleted = 0;
-    const promise = new Promise((resolve, reject) => {
+    const promise: PromiseWithListener = new Promise((resolve, reject) => {
       stream.on('data', (keys) => {
         if (keys.length) {
           const pipeline = Cache.redisInstance.pipeline();
-          keys.forEach(function (key) {
+          keys.forEach((key) => {
             pipeline.del(key);
             deleted += 1;
           });
@@ -221,7 +223,7 @@ export default class Cache {
         reject(ex);
       });
       stream.on('end', () => {
-        console.log(`Deleted ${deleted} keys`);
+        console.info(`Deleted ${deleted} keys`);
         resolve(deleted);
       });
     });
@@ -237,7 +239,7 @@ export default class Cache {
     return Cache.redisInstance;
   }
 
-  constructor(options = {}) {
+  constructor(options: Record<string, never> = {}) {
     this.entities = options.entities || [];
     this.name = options.cachePrefix;
     Object.keys(this.entities).forEach((entity) => {
