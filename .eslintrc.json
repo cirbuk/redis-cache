@@ -1,0 +1,76 @@
+{
+  "extends": [
+    "./eslint"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "__kubric_config__": "readonly",
+    "JSX": "readonly"
+  },
+  "parserOptions": {
+    "sourceType": "module" // https://github.com/mysticatea/eslint-plugin-node#-configs
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.stories.tsx"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.json",
+        "sourceType": "module"
+      },
+      "extends": [
+        "./eslint/typescript"
+      ],
+      "rules": {
+        "class-methods-use-this": "off",
+        "@typescript-eslint/no-shadow": "off",
+        "import/no-named-default": "off",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unused-expressions": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/mouse-events-have-key-events": "off",
+        "node/no-unsupported-features/es-syntax": "off"
+      }
+    }
+  ],
+  "rules": {
+    "consistent-return": "off",
+    "import/no-anonymous-default-export": "off",
+    "import/no-dynamic-require": "off",
+    "global-require": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/mouse-events-have-key-events": "off",
+    "max-classes-per-file": "off",
+    "no-nested-ternary": "off",
+    "no-new": "off",
+    "no-plusplus": "off",
+    "no-process-exit": "off",
+    "no-restricted-globals":  "off",
+    "node/exports-style": "off",
+    "node/no-unpublished-import": "off",
+    "node/no-unsupported-features/es-syntax": "off",
+    "no-console": ["error", { "allow": ["warn", "debug", "error", "info"] }],
+    "no-unused-expressions": [
+      "error",
+      {
+        "allowShortCircuit": true,
+        "allowTernary": true
+      }
+    ],
+    "no-shadow": "off",
+    "@typescript-eslint/default-param-last": "off"
+  },
+  "settings": {
+    // Override `eslint-plugin-node` rule
+    "node": {
+      "tryExtensions": [".js", ".json", ".node", ".ts", ".tsx"]
+    }
+  },
+  "env": {
+    "node": true
+  }
+}
