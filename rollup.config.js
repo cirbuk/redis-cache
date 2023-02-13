@@ -14,11 +14,10 @@ export default [
     input: 'src/index.ts',
 
     output: {
-      // Change output library name
-      name: 'resolver',
+      name: '@kubric/redis-cache',
       file: pkg.browser,
       format: 'umd',
-      global: {
+      globals: {
         '@kubric/utils': 'litedash',
       },
     },
@@ -26,8 +25,9 @@ export default [
     external: (id) => id.includes('@babel/runtime') || externalSet.has(id),
 
     plugins: [
-      // Remove if not a typescript library
-      typescript(),
+      typescript({
+        tsconfig: './tsconfig.json',
+      }),
       resolve({
         browser: true,
         preferBuiltins: false,
@@ -48,7 +48,6 @@ export default [
   },
 
   {
-    // Change input file as required(point to js file if not a typescript library)
     input: 'src/index.ts',
     output: [
       {
@@ -63,8 +62,9 @@ export default [
     external: (id) => id.includes('@babel/runtime') || externalSet.has(id),
 
     plugins: [
-      // Remove if not a typescript library
-      typescript(),
+      typescript({
+        tsconfig: './tsconfig.json',
+      }),
     ],
   },
 ];

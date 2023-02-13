@@ -4,9 +4,7 @@
   ],
   "globals": {
     "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly",
-    "__kubric_config__": "readonly",
-    "JSX": "readonly"
+    "SharedArrayBuffer": "readonly"
   },
   "parserOptions": {
     "sourceType": "module" // https://github.com/mysticatea/eslint-plugin-node#-configs
@@ -15,8 +13,7 @@
     {
       "files": [
         "**/*.ts",
-        "**/*.tsx",
-        "**/*.stories.tsx"
+        "**/*.tsx"
       ],
       "parserOptions": {
         "project": "./tsconfig.json",
@@ -33,7 +30,11 @@
         "@typescript-eslint/no-unused-expressions": "off",
         "jsx-a11y/click-events-have-key-events": "off",
         "jsx-a11y/mouse-events-have-key-events": "off",
-        "node/no-unsupported-features/es-syntax": "off"
+        "node/no-unsupported-features/es-syntax": "off",
+        "no-promise-executor-return": "off",
+        "prefer-promise-reject-errors": "off",
+        "no-console": ["error", { "allow": ["warn", "debug", "error", "info"] }],
+        "@typescript-eslint/explicit-function-return-type": "warn"
       }
     }
   ],

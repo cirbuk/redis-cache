@@ -1,3 +1,4 @@
+import {Readable} from 'stream';
 import {Redis} from 'ioredis';
 
 export type InitOptions = {
@@ -12,3 +13,6 @@ export type Config = {
   cachePrefix?: string;
   host: string;
 };
+
+export type PromiseWithListener = Promise<unknown> &
+  Partial<{on: Readable['on']}>;

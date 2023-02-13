@@ -15,8 +15,6 @@ module.exports = {
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint"],
   rules: {
-    // Manually override this: https://git.io/JY9dm
-    "no-undef": ["error", { "typeof": true }],
     "@typescript-eslint/explicit-function-return-type": "error",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-inferrable-types": "error",
