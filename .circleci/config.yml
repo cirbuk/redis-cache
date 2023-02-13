@@ -5,7 +5,7 @@
 version: 2.1
 
 defaults: &defaults
-  working_directory: ~/resolver
+  working_directory: ~/repo
   docker:
     - image: cimg/node:16.15.1
 
@@ -23,7 +23,7 @@ jobs:
 
       - run:
           name: Installing packages
-          command: yarn install
+          command: npm install
       - run:
           name: Run tests
           command: npm test
@@ -34,13 +34,28 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - persist_to_workspace:
-          root: ~/resolver
+          root: ~/repo
           paths: .
   deploy:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/resolver
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          name: Installing packages
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+
       - run:
           name: Setup release directory
           command: |
@@ -52,18 +67,20 @@ jobs:
             DIR=__release__ node scripts/prepare.js
       - run:
           name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/resolver/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish package
-          command: "npm publish ./__release__ --access public"
+          command: "npm publish ./__release__"
 
 workflows:
-  test-deploy:
+  deploy:
     jobs:
       - test:
           filters:
             tags:
               only: /^v.*/
+            branches:
+              ignore: /.*/
       - deploy:
           context: npm
           requires:
