@@ -14,7 +14,7 @@ export default [
     input: 'src/index.ts',
 
     output: {
-      name: '@kubric/redis-cache',
+      name: 'redisCache',
       file: pkg.browser,
       format: 'umd',
       globals: {
