@@ -1,11 +1,11 @@
+import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import typescript from '@rollup/plugin-typescript';
 import {terser} from 'rollup-plugin-terser';
 import babel from '@rollup/plugin-babel';
 import pkg from './package.json';
 
-const externalSet = new Set(['@kubric/utils']);
+const externalSet = new Set(['@kubric/utils', 'ioredis']);
 
 export default [
   // browser-friendly UMD build
@@ -19,6 +19,7 @@ export default [
       format: 'umd',
       globals: {
         '@kubric/utils': 'litedash',
+        'ioredis': "IORedis"
       },
     },
 
@@ -34,6 +35,7 @@ export default [
       }),
       babel({
         babelrc: false,
+        babelHelpers: 'bundled',
         exclude: 'node_modules/**',
         plugins: [
           require('@babel/plugin-proposal-class-properties'),
