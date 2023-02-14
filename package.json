@@ -6,6 +6,7 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "dev": "rollup -w -c",
     "build": "rimraf dist && rollup -c",
     "test": "jest",
     "test-watch": "jest --watch",
