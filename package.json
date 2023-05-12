@@ -1,6 +1,6 @@
 {
   "name": "@kubric/redis-cache",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Redis cache wrapper over ioredis with configurable entities",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

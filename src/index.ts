@@ -7,7 +7,7 @@ export default class Cache {
 
   static timeoutPerRequest?: number;
 
-  static cacheName: string;
+  private cacheName: string;
 
   private entities: any;
 
@@ -75,14 +75,14 @@ export default class Cache {
     }
   }
 
-  static async get(entity: string, key: string): Promise<any> {
-    key = Cache.getKey(Cache.cacheName, entity, key);
+  static async get(this: Cache, entity: string, key: string): Promise<any> {
+    key = Cache.getKey(this.cacheName, entity, key);
     const result = await Cache.execute(Cache.redisInstance.get(key));
     return Cache.parseResult(result);
   }
 
-  static async set(entity: string, expiry, key, value) {
-    key = Cache.getKey(Cache.cacheName, entity, key);
+  static async set(this: Cache, entity: string, expiry, key, value) {
+    key = Cache.getKey(this.cacheName, entity, key);
     let valueToSet = value;
     try {
       valueToSet = JSON.stringify(value);
@@ -99,8 +99,12 @@ export default class Cache {
     return true;
   }
 
-  static async deleteKey(entity: string, key: string): Promise<number> {
-    const parsedKey = Cache.getKey(Cache.cacheName, entity, key);
+  static async deleteKey(
+    this: Cache,
+    entity: string,
+    key: string
+  ): Promise<number> {
+    const parsedKey = Cache.getKey(this.cacheName, entity, key);
     return Cache.redisInstance.del(parsedKey);
   }
 
@@ -112,23 +116,24 @@ export default class Cache {
    * @returns {Promise<boolean>} - Promise that resolves to true if the value was newly written.
    */
   static async setHashValue(
+    this: Cache,
     entity: string,
     setKey: string,
     field: string,
     value: string
   ): Promise<boolean> {
-    const hashKey = Cache.getKey(Cache.cacheName, entity, setKey);
+    const hashKey = Cache.getKey(this.cacheName, entity, setKey);
     const result = await Cache.redisInstance.hset(hashKey, field, value);
     return result === 1;
   }
 
-  static getHashValue(entity, setKey, field) {
-    const hashKey = Cache.getKey(Cache.cacheName, entity, setKey);
+  static getHashValue(this: Cache, entity, setKey, field) {
+    const hashKey = Cache.getKey(this.cacheName, entity, setKey);
     return Cache.redisInstance.hget(hashKey, field);
   }
 
-  static getHashSet(entity, setKey, asArray = false) {
-    const setName = Cache.getKey(Cache.cacheName, entity, setKey);
+  static getHashSet(this: Cache, entity, setKey, asArray = false) {
+    const setName = Cache.getKey(this.cacheName, entity, setKey);
     return Cache.redisInstance.hgetall(setName).then((results) =>
       Object.keys(results).reduce(
         (acc, key) => {
@@ -141,13 +146,13 @@ export default class Cache {
     );
   }
 
-  static async deleteHashValue(entity, setKey, field) {
-    const hashKey = Cache.getKey(Cache.cacheName, entity, setKey);
+  static async deleteHashValue(this: Cache, entity, setKey, field) {
+    const hashKey = Cache.getKey(this.cacheName, entity, setKey);
     return Cache.redisInstance.hdel(hashKey, field);
   }
 
-  static async deleteHashValues(entity, setKey, keyPattern) {
-    const hashKey = Cache.getKey(Cache.cacheName, entity, setKey);
+  static async deleteHashValues(this: Cache, entity, setKey, keyPattern) {
+    const hashKey = Cache.getKey(this.cacheName, entity, setKey);
     const stream = Cache.redisInstance.hscanStream(hashKey, {
       match: keyPattern,
     });
@@ -180,13 +185,13 @@ export default class Cache {
     return promise;
   }
 
-  static async getKeys(entity, keys) {
+  static async getKeys(this: Cache, entity, keys) {
     if (typeof keys === 'string') {
       keys = [keys];
     }
     const promises = keys.map((key) =>
       Cache.redisInstance
-        .get(Cache.getKey(Cache.cacheName, entity, key))
+        .get(Cache.getKey(this.cacheName, entity, key))
         .then((result) => {
           try {
             return JSON.parse(result ?? '');
@@ -198,15 +203,13 @@ export default class Cache {
     return Promise.all(promises);
   }
 
-  static watchKey(entity, key) {
-    return Cache.redisInstance.watch(
-      Cache.getKey(Cache.cacheName, entity, key)
-    );
+  static watchKey(this: Cache, entity, key) {
+    return Cache.redisInstance.watch(Cache.getKey(this.cacheName, entity, key));
   }
 
-  static deleteAll(entity, keyPattern = '*') {
+  static deleteAll(this: Cache, entity, keyPattern = '*') {
     const stream = Cache.redisInstance.scanStream({
-      match: Cache.getKey(Cache.cacheName, entity, keyPattern),
+      match: Cache.getKey(this.cacheName, entity, keyPattern),
     });
     let deleted = 0;
     const promise: PromiseWithListener = new Promise((resolve, reject) => {
@@ -243,7 +246,7 @@ export default class Cache {
 
   constructor(options: Record<string, never> = {}) {
     this.entities = options.entities || [];
-    Cache.cacheName = options.cachePrefix;
+    this.cacheName = options.cachePrefix;
 
     Object.keys(this.entities).forEach((entity) => {
       const entityObj = this.entities[entity];
@@ -268,11 +271,7 @@ export default class Cache {
         this[`get${name}Value`] = Cache.getHashValue.bind(this, entity);
         this[`set${name}Value`] = Cache.setHashValue.bind(this, entity);
         this[`delete${name}Value`] = Cache.deleteHashValue.bind(this, entity);
-        this[`delete${name}Values`] = Cache.deleteHashValues.bind(
-          Cache,
-          this,
-          entity
-        );
+        this[`delete${name}Values`] = Cache.deleteHashValues.bind(this, entity);
       }
     });
   }
